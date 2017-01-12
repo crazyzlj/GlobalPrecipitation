@@ -5,8 +5,8 @@
 
 |数据名称及下载链接|源数据时段|时间分辨率|
 |:--:|:--:|:--:|
-|TRMM 3B42V7|1998-2016.10|daily|
-|TRMM 3B43V7|1998-2016.10|monthly|
+|[TRMM_3B42_Daily.7](https://mirador.gsfc.nasa.gov/cgi-bin/mirador/presentNavigation.pl?tree=project&dataset=TRMM_3B42_Daily.7&project=TRMM&dataGroup=Gridded&version=7&CGISESSID=72fb61c358ddb99e5586f46a8e343934 "Daily TRMM and Others Rainfall Estimate (3B42 V7 derived)")|1998.1-|daily|
+|[TRMM_3B43.7](https://mirador.gsfc.nasa.gov/cgi-bin/mirador/presentNavigation.pl?tree=project&dataset=3B43:%20Monthly%200.25%20x%200.25%20degree%20merged%20TRMM%20and%20other%20sources%20estimates&project=TRMM&dataGroup=Gridded&version=7&CGISESSID=72fb61c358ddb99e5586f46a8e343934 "3B43: Monthly 0.25 x 0.25 degree merged TRMM and other sources estimates ")|1998.1-|monthly|
 |PERSIANN|1983-2016.10|3 hours|
 |CMAP|1979-2016.11|daily|
 |ERA-interim|1979-2016.11|daily|
@@ -22,6 +22,8 @@
 
 ### 2.2 数据提取及入库
 针对不同格式的数据进行数据提取，并存入SQL数据库（以小巧的SQLite为例）。
+
+[NetCDF4Excel](https://github.com/NetCDF4Excel/project)
 
 ### 2.3 数据读取
 设计几种通用的数据读取格式。
