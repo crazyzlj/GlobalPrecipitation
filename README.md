@@ -7,15 +7,16 @@
 |:--:|:--:|:--:|
 |[TRMM_3B42_Daily.7](https://mirador.gsfc.nasa.gov/cgi-bin/mirador/presentNavigation.pl?tree=project&dataset=TRMM_3B42_Daily.7&project=TRMM&dataGroup=Gridded&version=7&CGISESSID=72fb61c358ddb99e5586f46a8e343934 "Daily TRMM and Others Rainfall Estimate (3B42 V7 derived)")|1998.1-|daily|
 |[TRMM_3B43.7](https://mirador.gsfc.nasa.gov/cgi-bin/mirador/presentNavigation.pl?tree=project&dataset=3B43:%20Monthly%200.25%20x%200.25%20degree%20merged%20TRMM%20and%20other%20sources%20estimates&project=TRMM&dataGroup=Gridded&version=7&CGISESSID=72fb61c358ddb99e5586f46a8e343934 "3B43: Monthly 0.25 x 0.25 degree merged TRMM and other sources estimates ")|1998.1-|monthly|
-|PERSIANN|1983-2016.10|3 hours|
-|CMAP|1979-2016.11|daily|
-|ERA-interim|1979-2016.11|daily|
-|CHCN-D|1880-2016.3|daily|
+|[PERSIANN](http://chrsdata.eng.uci.edu/ "PERSIANN")|1983-Present|1, 3, 6 hourly, daily, monthly|
+|[CMAP](https://www.esrl.noaa.gov/psd/data/gridded/data.cmap.html "CMAP")[^ref1]|1979-2016.11|monthly|
+|[ERA-interim](http://apps.ecmwf.int/datasets/data/interim-full-daily/levtype=sfc/ "ERA-interim")|1979.1-2016.10|sub-daily, daily, monthly|
+|[GHCN-D](https://www.ncdc.noaa.gov/oa/climate/ghcn-daily/ "GHCN-D")|1880-2016.3|daily|
 |GLOBAL P and T|1900-2014.12|monthly|
 |GPCP|1996-2015.11|daily|
 |PREC-L|1948-2016.12|monthly|
 |CH0.5|1951-2016.12|daily|
 
+[^ref1]: ftp://ftp.cpc.ncep.noaa.gov/precip/cmap 
 ## 2. 工作流分解
 
 ### 2.1 分别下载不同类型的降水数据

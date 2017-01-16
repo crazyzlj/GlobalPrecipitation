@@ -130,31 +130,165 @@ def downNASAEarthdata(productname, **kwargs):
         tmpdate += datetime.timedelta(days = deltadays)
 
 
+def downPERSIANNdata(productname, **kwargs):
+    baseftp = 'persiann.eng.uci.edu'
+    availableTimeStep = {'PERSIANN'    : ['daily', 'mthly', 'yearly', '3hrly', '6hrly', 'hrly'],
+                         'PERSIANN-CCS': ['daily', 'mthly', 'yearly', '3hrly', '6hrly', 'hrly'],
+                         'PERSIANN-CDR': ['daily', 'mthly', 'yearly']}
+    remotedir = 'CHRSdata/'
+    if 'subproduct' in kwargs.keys():
+        if kwargs['subproduct'] is not None:
+            subproduct = kwargs['subproduct']
+            productname += subproduct
+    remotedir += productname + '/'
+
+    timestep = 'yearly'
+    if 'timestep' in kwargs.keys():
+        if kwargs['timestep'] in availableTimeStep.get(productname):
+            timestep = kwargs['timestep']
+    remotedir += timestep
+
+    usrname = 'anonymous'
+    pwd = ''
+    outpath = ''
+    # try to get the required key-values, or throw exception
+    try:
+        outpath = kwargs["workspace"]
+    except KeyError:
+        print ("downPERSIANNdata function must have the workspace args.")
+    # try to get optional key-values
+    if 'usrname' in kwargs.keys():
+        usrname = kwargs["usrname"]
+    if 'pwd' in kwargs.keys():
+        pwd = kwargs["pwd"]
+    logfile = None
+    if 'log' in kwargs.keys():
+        logfile = kwargs['log']
+        delfile(logfile)
+
+    import ftplib
+    from download_ftp_tree import download_ftp_tree
+    ftp = ftplib.FTP(baseftp, usrname, pwd)
+    download_ftp_tree(ftp, remotedir, outpath)
+
+
+def downCMAPdata(productname, **kwargs):
+    baseftp = 'ftp.cpc.ncep.noaa.gov'
+    remotedir = 'precip/'
+    availabledir = ['monthly', 'pentad', 'pentad_rt']
+    subproduct = 'monthly'
+    if 'subproduct' in kwargs.keys():
+        if kwargs['subproduct'] is not None:
+            subproduct = kwargs['subproduct']
+    productname = productname.lower()
+    productname += '/' + subproduct
+    remotedir += productname + '/'
+
+    usrname = 'anonymous'
+    pwd = ''
+    outpath = ''
+    # try to get the required key-values, or throw exception
+    try:
+        outpath = kwargs["workspace"]
+    except KeyError:
+        print ("downCMAPdata function must have the workspace args.")
+    # try to get optional key-values
+    if 'usrname' in kwargs.keys():
+        usrname = kwargs["usrname"]
+    if 'pwd' in kwargs.keys():
+        pwd = kwargs["pwd"]
+    logfile = None
+    if 'log' in kwargs.keys():
+        logfile = kwargs['log']
+        delfile(logfile)
+
+    import ftplib
+    from download_ftp_tree import download_ftp_tree
+    ftp = ftplib.FTP(baseftp, usrname, pwd)
+    download_ftp_tree(ftp, remotedir, outpath)
+
+
+def downECMWFdata(productname, **kwargs):
+    '''
+    Only available in UNIX-platform, tested on CentOS.
+    :param productname:
+    :param kwargs:
+    :return:
+    '''
+    from ecmwfapi import ECMWFDataServer
+    server = ECMWFDataServer()
+    # try to get the required key-values, or throw exception
+    try:
+        outpath = kwargs["workspace"]
+    except KeyError:
+        print ("downECMWFdata function must have the workspace args.")
+    savepath1 = outpath + os.sep + "ei-interim-sfc-oper-fc-79-16.nc"
+    server.retrieve({
+        "class"  : "ei",
+        "dataset": "interim",
+        "date"   : "1979-01-01/to/2016-10-31",
+        "expver" : "1",
+        "grid"   : "0.75/0.75",
+        "levtype": "sfc",
+        "param"  : "50.128/142.128/143.128/167.128/228.128/239.128",
+        "step"   : "3/6/9/12",
+        "stream" : "oper",
+        "time"   : "00:00:00/12:00:00",
+        "type"   : "fc",
+        "target" : savepath1,
+    })
+
+
 def download_precipitation(productname, **kwargs):
     print2log('******** Download %s data ********' % productname)
     if StringMatch(productname, "TRMM_3B42_Daily") or \
             StringMatch(productname, "TRMM_3B43"):
         downNASAEarthdata(productname, **kwargs)
+    elif StringMatch(productname, "PERSIANN"):
+        downPERSIANNdata(productname, **kwargs)
+    elif StringMatch(productname, "CMAP"):
+        downCMAPdata(productname, **kwargs)
+    elif StringMatch(productname, "ECMWF"):
+        downECMWFdata(productname, **kwargs)
 
 
 if __name__ == '__main__':
-    CUR_PATH = currentPath()
-    CUR_PATH = r'C:\Users\ZhuLJ\Desktop\TRMM_download'
-    DOWN_PATH = CUR_PATH + os.sep + 'download'
-    mkdir(DOWN_PATH)
-    # DOWN_PATH = currentPath()
+    # CUR_PATH = currentPath()
+    # CUR_PATH = r'C:\Users\ZhuLJ\Desktop\TRMM_download'
+    # DOWN_PATH = CUR_PATH + os.sep + 'download'
+    # mkdir(DOWN_PATH)
+    DOWN_PATH = currentPath()
 
-    # TRMM_3B42_Daily.7
-    product = "TRMM_3B42_Daily"
-    usrname = 'zhuliangjun'
-    pwd = 'Liangjun0130'
-    startdate = [2010, 1, 22]  # year, month, day, [mm, ss]
-    enddate = [2010, 1, 23]
-    log = DOWN_PATH + os.sep + product + '.log'
-    # TRMM_3B43.7
-    product = "TRMM_3B43"
+    # # TRMM_3B42_Daily.7
+    # product = "TRMM_3B42_Daily"
+    # usrname = 'zhuliangjun'
+    # pwd = 'Liangjun0130'
+    # startdate = [2010, 1, 22]  # year, month, day, [mm, ss]
+    # enddate = [2010, 1, 23]
+    # log = DOWN_PATH + os.sep + product + '.log'
+    # # TRMM_3B43.7
+    # product = "TRMM_3B43"
+    # download_precipitation(product, usrname = usrname, pwd = pwd,
+    #                        startdate = list2datetime(startdate),
+    #                        enddate = list2datetime(enddate),
+    #                        workspace = DOWN_PATH, log = log)
 
-    download_precipitation(product, usrname = usrname, pwd = pwd,
-                           startdate = list2datetime(startdate),
-                           enddate = list2datetime(enddate),
-                           workspace = DOWN_PATH, log = log)
+    # # download from ftp-server, such as PERSIANN
+    # product = "PERSIANN"
+    # subproduct = None  # can be None, '-CSS', or '-CDR', None is the default
+    # timestep = 'daily'  # can be 'daily', 'mthly', 'yearly'. '3hrly', '6hrly', and 'hrly' for PERSIANN and PERSIANN-CSS
+    # log = DOWN_PATH + os.sep + product + '.log'
+    # download_precipitation(product, subproduct = subproduct,
+    #                        timestep = timestep,
+    #                        workspace = DOWN_PATH, log = log)
+
+    # # download CMAP data
+    # product = "CMAP"
+    # subproduct = 'monthly'  # can be 'monthly', 'pentad', 'pentad_rt'
+    # log = DOWN_PATH + os.sep + product + '.log'
+    # download_precipitation(product, subproduct = subproduct, workspace = DOWN_PATH, log = log)
+
+    # download ECMWF data
+    product = "ECMWF"
+    subproduct = 'interim'
+    download_precipitation(product, subproduct = subproduct, workspace = DOWN_PATH)
