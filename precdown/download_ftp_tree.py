@@ -51,8 +51,8 @@ def _download_ftp_file(ftp_handle, name, dest, overwrite):
             with open(dest, 'wb') as f:
                 ftp_handle.retrbinary("RETR {0}".format(name), f.write)
             print("downloaded: {0}".format(dest))
-        except FileNotFoundError:
-            print("FAILED: {0}".format(dest))
+        except (IOError, OSError) as e:
+            print("FAILED: {0}, exception: {1}".format(dest, e.message))
     else:
         print("already exists: {0}".format(dest))
 
