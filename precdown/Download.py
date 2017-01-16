@@ -218,26 +218,42 @@ def downECMWFdata(productname, **kwargs):
     from ecmwfapi import ECMWFDataServer
     server = ECMWFDataServer()
     # try to get the required key-values, or throw exception
+    startdate = datetime.datetime.today()
+    enddate = datetime.datetime.today()
     try:
+        startdate = kwargs["startdate"]
+        enddate = kwargs["enddate"]
         outpath = kwargs["workspace"]
     except KeyError:
-        print ("downECMWFdata function must have the workspace args.")
-    savepath1 = outpath + os.sep + "ei-interim-sfc-oper-fc-79-16.nc"
-    server.retrieve({
-        "class"  : "ei",
-        "dataset": "interim",
-        "date"   : "1979-01-01/to/2016-10-31",
-        "expver" : "1",
-        "grid"   : "0.75/0.75",
-        "levtype": "sfc",
-        "param"  : "50.128/142.128/143.128/167.128/228.128/239.128",
-        "step"   : "3/6/9/12",
-        "stream" : "oper",
-        "time"   : "00:00:00/12:00:00",
-        "type"   : "fc",
-        "target" : savepath1,
-    })
-
+        print ("downECMWFdata function must have the statdate, enddate, and workspace args.")
+    savepath = outpath + os.sep + "ei-interim-sfc-oper-fc-%s.nc"
+    tmpdate = startdate.replace(day = 1)
+    enddate = enddate.replace(day = 1)
+    while tmpdate <= enddate:
+        deltadays = GetDayNumber(tmpdate.year, tmpdate.month) - 1
+        tmpenddate = tmpdate + datetime.timedelta(days = deltadays)
+        datestring = tmpdate.strftime("%Y%m%d") + '/to/' + tmpenddate.strftime("%Y%m%d")
+        print (datestring)
+        tmpsavepath = savepath % (datestring.replace('/to/', '-'))
+        if os.path.exists(tmpsavepath):
+            tmpdate = tmpenddate + datetime.timedelta(days = 1)
+            continue
+        server.retrieve({
+            "class"  : "ei",
+            "dataset": "interim",
+            "date"   : datestring,
+            "expver" : "1",
+            "grid"   : "0.75/0.75",
+            "levtype": "sfc",
+            "param"  : "50.128/142.128/143.128/167.128/228.128/239.128",
+            "step"   : "3/6/9/12",
+            "stream" : "oper",
+            "time"   : "00:00:00/12:00:00",
+            "type"   : "fc",
+            "format" : "netcdf",
+            "target" : tmpsavepath,
+        })
+        tmpdate = tmpenddate + datetime.timedelta(days = 1)
 
 def download_precipitation(productname, **kwargs):
     print2log('******** Download %s data ********' % productname)
@@ -291,4 +307,9 @@ if __name__ == '__main__':
     # download ECMWF data
     product = "ECMWF"
     subproduct = 'interim'
-    download_precipitation(product, subproduct = subproduct, workspace = DOWN_PATH)
+    startdate = [1979, 1, 1]  # year, month, day, [mm, ss]
+    enddate = [2016, 10, 31]
+    download_precipitation(product, subproduct = subproduct,
+                           startdate = list2datetime(startdate),
+                           enddate = list2datetime(enddate),
+                           workspace = DOWN_PATH)
