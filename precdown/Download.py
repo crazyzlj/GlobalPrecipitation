@@ -7,7 +7,7 @@
 
 from Utils import *
 import urllib2
-
+from sendmail import send_mail
 
 def chunk_report(mbytes_so_far, total_size):
     if total_size > 0:
@@ -253,6 +253,7 @@ def downECMWFdata(productname, **kwargs):
             "format" : "netcdf",
             "target" : tmpsavepath,
         })
+        send_mail('zlj', 'zlj', "ECMWF Download report", "%s have been done!" % datestring)
         tmpdate = tmpenddate + datetime.timedelta(days = 1)
 
 def download_precipitation(productname, **kwargs):
@@ -307,7 +308,7 @@ if __name__ == '__main__':
     # download ECMWF data
     product = "ECMWF"
     subproduct = 'interim'
-    startdate = [1979, 1, 1]  # year, month, day, [mm, ss]
+    startdate = [2002, 1, 1]  # year, month, day, [mm, ss]
     enddate = [2016, 10, 31]
     download_precipitation(product, subproduct = subproduct,
                            startdate = list2datetime(startdate),

@@ -41,8 +41,9 @@ def usage():
 
 def send_mail(sender, to_list, sub, content, user = username, passw = password):
     msg = MIMEText(content, _subtype = 'plain', _charset = 'gb2312')
-    sender = getrealmailaddress(sender)
+    sender = getrealmailaddress(sender)[0]
     to_list = getrealmailaddress(to_list)
+    # print sender, to_list
     msg['Subject'] = Header(sub, 'utf-8')
     msg['From'] = sender
     msg['To'] = ','.join(to_list)
@@ -57,11 +58,11 @@ def send_mail(sender, to_list, sub, content, user = username, passw = password):
 
 def send_att_mail(sender, to_list, sub, content, att, user = username, passw = password):
     msg = MIMEMultipart()
-    sender = getrealmailaddress(sender)
+    sender = getrealmailaddress(sender)[0]
     to_list = getrealmailaddress(to_list)
     msg['Subject'] = Header(sub, 'utf-8')
     msg['From'] = sender
-    msg['To'] = to_list
+    msg['To'] = ','.join(to_list)
     msg['Date'] = Utils.formatdate(localtime = 1)
     print msg['Date']
     attachment_file = att
@@ -87,10 +88,11 @@ def getrealmailaddress(usr):
         if '@' not in item:
             item += mail_postfix
         to_list.append(item)
-    if len(to_list) == 1:
-        return to_list[0]
-    else:
-        return to_list
+    return to_list
+    # if len(to_list) == 1:
+    #     return to_list[0]
+    # else:
+    #     return to_list
 
 
 if __name__ == '__main__':
