@@ -11,10 +11,10 @@
 |[CMAP](https://www.esrl.noaa.gov/psd/data/gridded/data.cmap.html "CMAP")[^ref1]|1979-2016.11|monthly|
 |[ERA-interim](http://apps.ecmwf.int/datasets/data/interim-full-daily/levtype=sfc/ "ERA-interim")|1979.1-2016.10|sub-daily, daily, monthly|
 |[GHCN-D](https://www.ncdc.noaa.gov/oa/climate/ghcn-daily/ "GHCN-D")|1880-2016.3|daily|
-|GLOBAL P and T|1900-2014.12|monthly|
+|GLOBAL P and T (**NOT FOUND**)|1900-2014.12|monthly|
 |[GPCP](https://www1.ncdc.noaa.gov/pub/data/gpcp/daily-v1.2/)|1996-2015.10|daily|
 |[PREC-L](https://www.esrl.noaa.gov/psd/data/gridded/data.precl.html)|1948-2016.12|monthly|
-|[CH0.5](http://rcg.gvc.gu.se/)|1961-2010|daily|
+|[CH0.5](http://rcg.gvc.gu.se/)|1951-2010|daily|
 
 [^ref1]: ftp://ftp.cpc.ncep.noaa.gov/precip/cmap 
 ## 2. 工作流分解
