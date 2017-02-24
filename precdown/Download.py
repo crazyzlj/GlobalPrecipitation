@@ -8,6 +8,8 @@
 from Utils import *
 import urllib2
 from sendmail import send_mail
+from bs4 import BeautifulSoup
+
 
 def chunk_report(mbytes_so_far, total_size):
     if total_size > 0:
@@ -128,6 +130,49 @@ def downNASAEarthdata(productname, **kwargs):
                 else:
                     break
         tmpdate += datetime.timedelta(days = deltadays)
+
+
+def read_url(url):
+    url = url.replace(" ", "%20")
+    req = urllib2.Request(url)
+    a = urllib2.urlopen(req).read()
+    soup = BeautifulSoup(a, 'html.parser')
+    x = (soup.find_all('a'))
+    allurl = []
+    for i in x:
+        file_name = i.extract().get_text()
+        url_new = url + file_name
+        url_new = url_new.replace(" ", "%20")
+        # if file_name[-1] == '/' and file_name[0] != '.':
+        #     read_url(url_new)
+        # print(url_new)
+        allurl.append(url_new)
+    return allurl
+
+
+def downHTTPSannoymous(productname, **kwargs):
+    try:
+        url = kwargs["baseurl"]
+        outpath = kwargs["workspace"]
+        downurls = read_url(url)
+        for singleurl in downurls:
+            #  if the singleurl is directory, the create new folder
+            if singleurl[-1] == '/' and singleurl[0] != '.':
+                subdir = outpath + os.sep + os.path.split(str(singleurl)[:-1])[1]
+                mkdir(subdir)
+                downHTTPSannoymous(productname, baseurl = singleurl, workspace = subdir)
+            elif os.path.splitext(singleurl)[1] != '':  # download file
+                try:
+                    tmpfile = outpath + os.sep + os.path.basename(str(singleurl))
+                    print ("Downloading %s..." % os.path.basename(str(singleurl)))
+                    if not os.path.isfile(tmpfile) or not os.path.exists(tmpfile):
+                        request = urllib2.Request(singleurl)
+                        response = urllib2.urlopen(request)
+                        chunk_read(response, savepath = tmpfile)
+                except urllib2.HTTPError or urllib2.URLError, e:
+                    print e.code
+    except KeyError:
+        print ("downHTTPSannoymous function must have the baseUrl and workspace args.")
 
 
 def downPERSIANNdata(productname, **kwargs):
@@ -256,6 +301,37 @@ def downECMWFdata(productname, **kwargs):
         send_mail('zlj', 'zlj', "ECMWF Download report", "%s have been done!" % datestring)
         tmpdate = tmpenddate + datetime.timedelta(days = 1)
 
+def downCHdata(**kwargs):
+    try:
+        outpath = kwargs['workspace']
+        baseurl = 'http://rcg.gvc.gu.se/data/ChinaPrecip/plot/%d/P%d-%d-%d.jpg'
+        yperiod = [1951, 2005]
+        dlt = datetime.timedelta(days = 1)
+        for year in range(yperiod[0], yperiod[1] + 1, 1):
+            subdir = outpath + os.sep + str(year)
+            mkdir(subdir)
+            startday = datetime.datetime(year, 1, 1)
+            days = 365
+            if IsLeapYear(year):
+                days = 366
+            for i in range(days):
+                newday = startday + dlt * i
+                filename = 'P%d-%d-%d.jpg' % (newday.year, newday.month, newday.day)
+                storedpath = subdir + os.sep + filename
+                downurl = baseurl % (newday.year, newday.year, newday.month, newday.day)
+                try:
+                    print ("Downloading %s..." % filename)
+                    if not os.path.isfile(storedpath) or not os.path.exists(storedpath):
+                        request = urllib2.Request(downurl)
+                        response = urllib2.urlopen(request)
+                        chunk_read(response, savepath = storedpath)
+                except urllib2.HTTPError or urllib2.URLError, e:
+                    print e.code
+    except KeyError:
+        print ("downCHdata function must have the workspace args.")
+
+
+
 def download_precipitation(productname, **kwargs):
     print2log('******** Download %s data ********' % productname)
     if StringMatch(productname, "TRMM_3B42_Daily") or \
@@ -267,6 +343,10 @@ def download_precipitation(productname, **kwargs):
         downCMAPdata(productname, **kwargs)
     elif StringMatch(productname, "ECMWF"):
         downECMWFdata(productname, **kwargs)
+    elif StringMatch(productname, "GPCP_daily"):
+        downHTTPSannoymous(productname, **kwargs)
+    elif StringMatch(productname, "CH0.5"):
+        downCHdata(**kwargs)
 
 
 if __name__ == '__main__':
@@ -274,7 +354,8 @@ if __name__ == '__main__':
     # CUR_PATH = r'C:\Users\ZhuLJ\Desktop\TRMM_download'
     # DOWN_PATH = CUR_PATH + os.sep + 'download'
     # mkdir(DOWN_PATH)
-    DOWN_PATH = currentPath()
+    # DOWN_PATH = currentPath()
+    DOWN_PATH = r"D:\tmp\CH0.5\interpolated_prec_jpg"
 
     # # TRMM_3B42_Daily.7
     # product = "TRMM_3B42_Daily"
@@ -305,12 +386,22 @@ if __name__ == '__main__':
     # log = DOWN_PATH + os.sep + product + '.log'
     # download_precipitation(product, subproduct = subproduct, workspace = DOWN_PATH, log = log)
 
-    # download ECMWF data
-    product = "ECMWF"
-    subproduct = 'interim'
-    startdate = [2002, 1, 1]  # year, month, day, [mm, ss]
-    enddate = [2016, 10, 31]
-    download_precipitation(product, subproduct = subproduct,
-                           startdate = list2datetime(startdate),
-                           enddate = list2datetime(enddate),
-                           workspace = DOWN_PATH)
+    # # download ECMWF data
+    # product = "ECMWF"
+    # subproduct = 'interim'
+    # startdate = [2002, 1, 1]  # year, month, day, [mm, ss]
+    # enddate = [2016, 10, 31]
+    # download_precipitation(product, subproduct = subproduct,
+    #                        startdate = list2datetime(startdate),
+    #                        enddate = list2datetime(enddate),
+    #                        workspace = DOWN_PATH)
+
+    # # download GPCP_daily data
+    # product = "GPCP_daily"
+    # url = "https://www1.ncdc.noaa.gov/pub/data/gpcp/daily-v1.2/"
+    # download_precipitation(product, baseurl = url, workspace = DOWN_PATH)
+
+    # down CH0.5 interpolated data (.jpg format)
+    product = "CH0.5"
+    download_precipitation(product, workspace = DOWN_PATH)
+
