@@ -301,12 +301,25 @@ def downECMWFdata(productname, **kwargs):
         send_mail('zlj', 'zlj', "ECMWF Download report", "%s have been done!" % datestring)
         tmpdate = tmpenddate + datetime.timedelta(days = 1)
 
+
 def downCHdata(**kwargs):
     try:
         outpath = kwargs['workspace']
         baseurl = 'http://rcg.gvc.gu.se/data/ChinaPrecip/plot/%d/P%d-%d-%d.jpg'
         yperiod = [1951, 2005]
         dlt = datetime.timedelta(days = 1)
+
+        def downsingleurl(down_url, stored_path):
+            try:
+                tmprequest = urllib2.Request(down_url)
+                tmpresponse = urllib2.urlopen(tmprequest)
+                chunk_read(tmpresponse, savepath = stored_path)
+                return True
+            except urllib2.HTTPError or urllib2.URLError or "Exception", err:
+                print (err.code)
+                time.sleep(20)
+                return downsingleurl(down_url, stored_path)
+
         for year in range(yperiod[0], yperiod[1] + 1, 1):
             subdir = outpath + os.sep + str(year)
             mkdir(subdir)
@@ -319,17 +332,11 @@ def downCHdata(**kwargs):
                 filename = 'P%d-%d-%d.jpg' % (newday.year, newday.month, newday.day)
                 storedpath = subdir + os.sep + filename
                 downurl = baseurl % (newday.year, newday.year, newday.month, newday.day)
-                try:
-                    print ("Downloading %s..." % filename)
-                    if not os.path.isfile(storedpath) or not os.path.exists(storedpath):
-                        request = urllib2.Request(downurl)
-                        response = urllib2.urlopen(request)
-                        chunk_read(response, savepath = storedpath)
-                except urllib2.HTTPError or urllib2.URLError, e:
-                    print e.code
+                print ("Downloading %s..." % filename)
+                if not os.path.isfile(storedpath) or not os.path.exists(storedpath):
+                    downsingleurl(downurl, storedpath)
     except KeyError:
         print ("downCHdata function must have the workspace args.")
-
 
 
 def download_precipitation(productname, **kwargs):
@@ -404,4 +411,3 @@ if __name__ == '__main__':
     # down CH0.5 interpolated data (.jpg format)
     product = "CH0.5"
     download_precipitation(product, workspace = DOWN_PATH)
-
